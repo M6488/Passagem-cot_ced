@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Passagem de Serviço · Teams</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #6264a7;
+    --accent-dark: #464eb8;
+    --accent-soft: #f0f0fa;
+    --bg: #ffffff;
+    --line: #e6e8ef;
+    --text: #1f2430;
+    --muted: #7a8194;
+    --danger: #d13438;
+    --ok: #0e8a3e;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    text-align: center;
+    padding: 32px 16px 8px;
+  }
+  header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  header h1 .accent { color: var(--accent); }
+  header p {
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  #clock {
+    display: block;
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 6px 14px;
+    border-radius: 999px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  main {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    flex: 1;
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(20, 24, 40, .04), 0 8px 24px rgba(20, 24, 40, .05);
+  }
+  .card-body { padding: 18px; }
+
+  /* ===== Caixa de texto central ===== */
+  .composer textarea {
+    width: 100%;
+    min-height: 240px;
+    resize: vertical;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+    background: #fbfbfd;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s, background .15s;
+  }
+  .composer textarea:focus {
+    border-color: var(--accent);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(98, 100, 167, .12);
+  }
+  .composer textarea::placeholder { color: #aab0c0; }
+
+  .composer-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .author-row { display: flex; align-items: center; gap: 8px; }
+  .author-row label { font-size: 13px; color: var(--muted); }
+  .author-row input {
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    width: 190px;
+  }
+  .author-row input:focus { border-color: var(--accent); }
+  #charcount { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  #charcount.warn { color: var(--danger); font-weight: 600; }
+
+  /* ===== Ferramentas ===== */
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    border: 1.5px solid var(--line);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background .12s, border-color .12s, transform .05s;
+  }
+  .btn:hover { background: var(--accent-soft); border-color: #d4d6ea; }
+  .btn:active { transform: scale(.97); }
+  .btn.select {
+    position: relative;
+    padding-right: 8px;
+  }
+  .btn.select select {
+    appearance: none;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    outline: none;
+    cursor: pointer;
+    padding-right: 18px;
+  }
+  .quick-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    background: #f6f7fa;
+    border: 1px solid var(--line);
+    padding: 5px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all .12s;
+  }
+  .tag:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
+  /* ===== Seleção de chats ===== */
+  .chats-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .chats { display: flex; gap: 10px; flex-wrap: wrap; }
+  .chip { position: relative; }
+  .chip input { position: absolute; opacity: 0; pointer-events: none; }
+  .chip span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 1.5px solid var(--line);
+    border-radius: 999px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+    transition: all .12s;
+  }
+  .chip span::before {
+    content: '';
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--line);
+    transition: background .12s;
+  }
+  .chip:hover span { border-color: #c9cbe8; }
+  .chip input:checked + span {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .chip input:checked + span::before { background: #fff; }
+  .chip input:disabled + span { opacity: .45; cursor: not-allowed; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+  /* ===== Ação principal ===== */
+  .send-row { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+  .btn-primary {
+    flex: 1;
+    justify-content: center;
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 14px 20px;
+    border-radius: 12px;
+    letter-spacing: .01em;
+  }
+  .btn-primary:hover { background: var(--accent-dark); }
+  .btn-primary:disabled { opacity: .55; cursor: not-allowed; }
+  .btn-preview { flex-shrink: 0; }
+  #status { display: none; font-size: 13.5px; padding: 10px 14px; border-radius: 10px; line-height: 1.5; }
+  #status.ok { display: block; background: #ecf8f0; color: var(--ok); border: 1px solid #bfe6cd; }
+  #status.err { display: block; background: #fdf0f0; color: var(--danger); border: 1px solid #f2c9c9; }
+
+  /* ===== Histórico ===== */
+  .history { margin-top: 6px; }
+  .history-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 18px 0;
+    font-size: 13px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+  .history-head button {
+    border: none; background: none; color: var(--muted);
+    font-size: 12px; font-weight: 500; text-decoration: underline; cursor: pointer;
+  }
+  .history-list { list-style: none; padding: 6px 10px 12px; }
+  .history-list li {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 10px; border-radius: 10px; cursor: pointer;
+    transition: background .12s;
+  }
+  .history-list li:hover { background: var(--accent-soft); }
+  .history-list li .h-time { font-size: 11.5px; color: var(--accent); font-weight: 600; white-space: nowrap; padding-top: 2px; }
+  .history-list li .h-body { flex: 1; min-width: 0; }
+  .history-list li .h-body p {
+    font-size: 13px; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .history-list li .h-body small { font-size: 11px; color: var(--muted); }
+  .history-list li .h-del {
+    border: none; background: none; color: var(--muted); cursor: pointer;
+    font-size: 15px; padding: 4px; border-radius: 6px; line-height: 1;
+  }
+  .history-list li .h-del:hover { color: var(--danger); background: #fdf0f0; }
+  .history-empty { font-size: 13px; color: var(--muted); padding: 10px 14px; }
+
+  /* ===== Modal de pré-visualização ===== */
+  .overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(20, 24, 40, .45);
+    z-index: 50;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 48px 16px;
+    overflow: auto;
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 16px; width: 100%; max-width: 520px;
+    box-shadow: 0 24px 64px rgba(0,0,0,.25); overflow: hidden;
+  }
+  .modal-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 18px; border-bottom: 1px solid var(--line);
+    font-size: 14px; font-weight: 600;
+  }
+  .modal-head button { border: none; background: none; font-size: 18px; cursor: pointer; color: var(--muted); }
+  /* card estilo Teams */
+  .teams-card { padding: 18px; background: #fff; }
+  .teams-card .tc-title {
+    font-size: 14px; font-weight: 700; color: #252423;
+    padding: 8px 12px; background: #f4f4f8; border-left: 4px solid var(--accent);
+    border-radius: 6px; margin-bottom: 12px;
+  }
+  .teams-card .tc-body {
+    font-size: 14px; line-height: 1.55; color: #252423;
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .teams-card .tc-foot {
+    margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--line);
+    font-size: 12px; color: var(--muted);
+  }
+
+  footer { text-align: center; padding: 14px; font-size: 12px; color: #b3b9c8; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Passagem de <span class="accent">Serviço</span></h1>
+  <p>Registre as pendências para a próxima equipe — direto no Microsoft Teams</p>
+  <span id="clock"></span>
+</header>
+
+<main>
+  <!-- Caixa de texto central -->
+  <section class="card composer card-body">
+    <textarea id="message" maxlength="4000"
+      placeholder="Escreva aqui os tópicos pendentes para a próxima equipe..."></textarea>
+    <div class="composer-meta">
+      <div class="author-row">
+        <label for="author">Assinando como</label>
+        <input type="text" id="author" placeholder="Seu nome (opcional)" autocomplete="name">
+      </div>
+      <span id="charcount">0 / 4000</span>
+    </div>
+  </section>
+
+  <!-- Ferramentas de texto -->
+  <section class="card card-body" style="display:flex;flex-direction:column;gap:12px;">
+    <div class="toolbar">
+      <span class="btn select">
+        <span>Modelo</span>
+        <select id="template">
+          <option value="">— escolher —</option>
+          <option value="padrao">Modelo padrão</option>
+          <option value="manha">Turno Manhã</option>
+          <option value="tarde">Turno Tarde</option>
+          <option value="noite">Turno Noite</option>
+          <option value="madrugada">Turno Madrugada</option>
+        </select>
+      </span>
+      <button class="btn" id="btn-ts" title="Insere data e hora no cursor">🕐 Data/hora</button>
+      <button class="btn" id="btn-clear" title="Limpa a caixa de texto">🗑️ Limpar</button>
+      <button class="btn" id="btn-copy" title="Copia o texto para a área de transferência">📋 Copiar</button>
+    </div>
+    <div class="quick-tags">
+      <span class="tag" data-tag="📌 ">📌 Pendência</span>
+      <span class="tag" data-tag="⚠️ ">⚠️ Alerta</span>
+      <span class="tag" data-tag="✅ ">✅ Resolvido</span>
+    </div>
+  </section>
+
+  <!-- Seleção de chats -->
+  <section class="card card-body">
+    <div class="chats-label">Enviar para — selecione um ou mais chats</div>
+    <div class="chats" id="chats"></div>
+    <p class="hint" id="chats-hint" style="display:none;">Você pode selecionar até 3 chats por envio. Os selecionados recebem a mesma mensagem.</p>
+  </section>
+
+  <!-- Envio -->
+  <section class="card card-body">
+    <div class="send-row">
+      <button class="btn-primary" id="btn-send">Enviar para o Teams</button>
+      <button class="btn btn-preview" id="btn-preview">Pré-visualizar</button>
+    </div>
+    <div id="status" role="status"></div>
+  </section>
+
+  <!-- Histórico -->
+  <section class="card history">
+    <div class="history-head">
+      <span>Histórico de envios</span>
+      <button id="btn-clear-history">limpar tudo</button>
+    </div>
+    <ul class="history-list" id="history"></ul>
+  </section>
+</main>
+
+<footer>Passagem de Serviço · envia cards para o Microsoft Teams via Workflows (webhook)</footer>
+
+<!-- Modal pré-visualização -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <span>Pré-visualização do card no Teams</span>
+      <button id="btn-close-preview">✕</button>
+    </div>
+    <div class="teams-card">
+      <div class="tc-title">📋 PASSAGEM DE SERVIÇO</div>
+      <div class="tc-body" id="preview-body"></div>
+      <div class="tc-foot" id="preview-foot"></div>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+'use strict';
+
+/* =========================================================
+   CONFIGURAÇÃO
+   A lista real de chats e URLs vem de config.js (sobrescreve
+   este padrão). Edite apenas o config.js.
+   ========================================================= */
+const DEFAULT_CONFIG = {
+  USE_PROXY: true,
+  CHATS: [
+    { id: 'chat1', name: 'Chat 1' },
+    { id: 'chat2', name: 'Chat 2' },
+    { id: 'chat3', name: 'Chat 3' }
+  ]
+};
+const CFG = (typeof TEAMS_CONFIG !== 'undefined' && TEAMS_CONFIG) ? TEAMS_CONFIG : DEFAULT_CONFIG;
+const MAX_CHATS = 3;
+
+/* =========================================================
+   ELEMENTOS
+   ========================================================= */
+const $ = id => document.getElementById(id);
+const textarea = $('message');
+const chatsBox = $('chats');
+const statusEl = $('status');
+const charcount = $('charcount');
+const author = $('author');
+const MAXLEN = 4000;
+
+/* =========================================================
+   RELÓGIO E DATA
+   ========================================================= */
+function now() { return new Date(); }
+function clock() {
+  const d = now();
+  $('clock').textContent = 'Hoje · ' + d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + ' — ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+clock();
+setInterval(clock, 30000);
+
+/* =========================================================
+   CHATS (checkboxes até 3)
+   ========================================================= */
+function renderChats() {
+  chatsBox.innerHTML = '';
+  CFG.CHATS.forEach(chat => {
+    const label = document.createElement('label');
+    label.className = 'chip';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = chat.id;
+    const span = document.createElement('span');
+    span.textContent = chat.name;
+    label.appendChild(cb);
+    label.appendChild(span);
+    chatsBox.appendChild(label);
+  });
+}
+function selectedChats() {
+  return [...chatsBox.querySelectorAll('input:checked')].map(cb => CFG.CHATS.find(c => c.id === cb.value));
+}
+function enforceMax() {
+  const checked = chatsBox.querySelectorAll('input:checked').length;
+  $('chats-hint').style.display = checked >= MAX_CHATS ? 'block' : 'none';
+
+  // No Vercel, os webhooks ficam nas Environment Variables do servidor.
+  // Portanto, NÃO devemos exigir chat.url no navegador.
+  chatsBox.querySelectorAll('input').forEach(cb => {
+    cb.disabled = !cb.checked && checked >= MAX_CHATS;
+  });
+}
+chatsBox.addEventListener('change', enforceMax);
+renderChats();
+enforceMax();
+
+/* =========================================================
+   EDIÇÃO DE TEXTO (cursor)
+   ========================================================= */
+function insertAtCursor(text) {
+  const start = textarea.selectionStart, end = textarea.selectionEnd;
+  if (textarea.value === '') { textarea.value = text; }
+  else {
+    textarea.value = textarea.value.slice(0, start) + text + textarea.value.slice(end);
+  }
+  textarea.focus();
+  const pos = start + text.length;
+  textarea.setSelectionRange(pos, pos);
+  updateCount();
+}
+
+function stamp() {
+  const d = now();
+  insertAtCursor('🕐 ' + d.toLocaleDateString('pt-BR') + ' – ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '\n');
+}
+$('btn-ts').addEventListener('click', stamp);
+
+document.querySelectorAll('.tag').forEach(t => {
+  t.addEventListener('click', () => insertAtCursor(t.dataset.tag));
+});
+
+$('template').addEventListener('change', e => {
+  const t = e.target.value;
+  if (!t) return;
+  const TEMPLATES = {
+    padrao: '📌 PENDÊNCIAS\n- \n\n⚠️ ALERTAS\n- \n\n📝 OBSERVAÇÕES\n- ',
+    manha: '📌 PENDÊNCIAS DO TURNO DA MANHÃ\n- \n\n⚠️ ALERTAS / OCORRÊNCIAS\n- \n\n📝 OBSERVAÇÕES PARA A TARDE\n- ',
+    tarde: '📌 PENDÊNCIAS DO TURNO DA TARDE\n- \n\n⚠️ ALERTAS / OCORRÊNCIAS\n- \n\n📝 OBSERVAÇÕES PARA A NOITE\n- ',
+    noite: '📌 PENDÊNCIAS DO TURNO DA NOITE\n- \n\n⚠️ ALERTAS / OCORRÊNCIAS\n- \n\n📝 OBSERVAÇÕES PARA A MANHÃ\n- ',
+    madrugada: '📌 PENDÊNCIAS DO TURNO DA MADRUGADA\n- \n\n⚠️ ALERTAS / OCORRÊNCIAS\n- \n\n📝 OBSERVAÇÕES PARA A MANHÃ\n- '
+  };
+  insertAtCursor(TEMPLATES[t]);
+  e.target.value = '';
+});
+
+$('btn-clear').addEventListener('click', () => {
+  if (textarea.value && !confirm('Limpar a caixa de texto?')) return;
+  textarea.value = '';
+  updateCount();
+});
+
+$('btn-copy').addEventListener('click', async () => {
+  if (!textarea.value) { flash('Caixa vazia — não há o que copiar.', 'err'); return; }
+  try {
+    await navigator.clipboard.writeText(textarea.value);
+    flash('Texto copiado para a área de transferência ✓', 'ok');
+  } catch {
+    textarea.select();
+    flash('Selecione o texto e use Ctrl+C', 'err');
+  }
+});
+
+function updateCount() {
+  charcount.textContent = textarea.value.length + ' / ' + MAXLEN;
+  charcount.classList.toggle('warn', textarea.value.length > MAXLEN * 0.9);
+}
+textarea.addEventListener('input', updateCount);
+
+/* =========================================================
+   PAYLOAD ADAPTIVE CARD (formato oficial p/ Workflows)
+   ========================================================= */
+function buildPayload(text, who, ts) {
+  return {
+    type: 'message',
+    attachments: [{
+      contentType: 'application/vnd.microsoft.card.adaptive',
+      content: {
+        $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
+        type: 'AdaptiveCard',
+        version: '1.4',
+        msteams: { width: 'Full' },
+        body: [
+          { type: 'TextBlock', text: '📋 PASSAGEM DE SERVIÇO', weight: 'Bolder', size: 'Medium' },
+          { type: 'TextBlock', text: text, wrap: true, separator: true },
+          {
+            type: 'TextBlock',
+            text: 'Enviado por ' + (who || '—') + ' · ' + ts,
+            isSubtle: true,
+            size: 'Small',
+            wrap: true,
+            separator: true
+          }
+        ]
+      }
+    }]
+  };
+}
+
+/* =========================================================
+   ENVIO
+   ========================================================= */
+function flash(msg, kind, ms) {
+  statusEl.className = kind;
+  statusEl.textContent = msg;
+  clearTimeout(flash._t);
+  if (ms) flash._t = setTimeout(() => { statusEl.className = ''; statusEl.textContent = ''; }, ms);
+}
+
+async function deliverToChat(chat, payload) {
+  const r = await fetch('/api/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chatId: chat.id, payload })
+  });
+  return r.status;
+}
+
+$('btn-send').addEventListener('click', async () => {
+  const text = textarea.value.trim();
+  const chats = selectedChats();
+
+  if (!text) { flash('Escreva os tópicos pendentes antes de enviar.', 'err', 4000); textarea.focus(); return; }
+  if (chats.length === 0) { flash('Selecione pelo menos 1 chat de destino.', 'err', 4000); return; }
+
+  const btn = $('btn-send');
+  btn.disabled = true;
+  const original = btn.textContent;
+  btn.textContent = 'Enviando…';
+
+  const ts = now().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const who = author.value.trim();
+  const payload = buildPayload(text, who, ts);
+  const results = await Promise.allSettled(chats.map(c => deliverToChat(c, payload)));
+
+  const ok = [], falhas = [];
+  results.forEach((res, i) => {
+    if (res.status === 'fulfilled' && res.value >= 200 && res.value < 300) ok.push(chats[i].name);
+    else falhas.push(chats[i].name + (res.status === 'fulfilled' ? ' (HTTP ' + res.value + ')' : ' (falha de conexão)'));
+  });
+
+  btn.disabled = false;
+  btn.textContent = original;
+
+  if (ok.length) saveHistory(text, ok, ts);
+  if (falhas.length === 0) {
+    flash('✓ Enviado para: ' + ok.join(', ') + ' às ' + ts, 'ok', 6000);
+  } else if (ok.length) {
+    flash('⚠️ Enviado para ' + ok.join(', ') + ', mas falhou em: ' + falhas.join('; ') + '. Confira as variáveis de ambiente do Vercel.', 'err', 8000);
+  } else {
+    flash('✗ Falha no envio (' + falhas.join('; ') + '). Confira as variáveis de ambiente do Vercel.', 'err', 9000);
+  }
+});
+
+/* =========================================================
+   PRÉ-VISUALIZAÇÃO
+   ========================================================= */
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+$('btn-preview').addEventListener('click', () => {
+  const text = textarea.value.trim();
+  const who = author.value.trim();
+  const ts = now().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  $('preview-body').textContent = text || '…';
+  $('preview-foot').textContent = 'Enviado por ' + (who || '—') + ' · ' + ts;
+  $('overlay').classList.add('open');
+});
+$('btn-close-preview').addEventListener('click', () => $('overlay').classList.remove('open'));
+$('overlay').addEventListener('click', e => { if (e.target === $('overlay')) $('overlay').classList.remove('open'); });
+
+/* =========================================================
+   HISTÓRICO (localStorage)
+   ========================================================= */
+const HISTORY_KEY = 'passagem_servico_history';
+function getHistory() { try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch { return []; } }
+function saveHistory(text, chats, ts) {
+  const h = getHistory();
+  h.unshift({ ts, text, chats });
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(0, 30)));
+  renderHistory();
+}
+function renderHistory() {
+  const list = $('history');
+  const h = getHistory();
+  list.innerHTML = '';
+  if (!h.length) {
+    const li = document.createElement('li');
+    li.className = 'history-empty';
+    li.textContent = 'Nenhum envio registrado ainda.';
+    list.appendChild(li);
+    return;
+  }
+  h.forEach((item, idx) => {
+    const li = document.createElement('li');
+    const time = document.createElement('span');
+    time.className = 'h-time';
+    time.textContent = item.ts.split(' ')[0];
+    const body = document.createElement('div');
+    body.className = 'h-body';
+    const p = document.createElement('p');
+    p.textContent = item.text.replace(/\n+/g, ' · ');
+    const small = document.createElement('small');
+    small.textContent = '→ ' + item.chats.join(', ');
+    body.appendChild(p);
+    body.appendChild(small);
+    const del = document.createElement('button');
+    del.className = 'h-del';
+    del.textContent = '✕';
+    del.title = 'Excluir do histórico';
+    del.addEventListener('click', e => {
+      e.stopPropagation();
+      const h2 = getHistory();
+      h2.splice(idx, 1);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(h2));
+      renderHistory();
+    });
+    li.appendChild(time);
+    li.appendChild(body);
+    li.appendChild(del);
+    li.addEventListener('click', () => {
+      textarea.value = item.text;
+      updateCount();
+      textarea.focus();
+      flash('Registro reaberto no editor — você pode editar e reenviar.', 'ok', 3500);
+    });
+    list.appendChild(li);
+  });
+}
+$('btn-clear-history').addEventListener('click', () => {
+  if (!getHistory().length) return;
+  if (confirm('Apagar todo o histórico de envios?')) {
+    localStorage.removeItem(HISTORY_KEY);
+    renderHistory();
+  }
+});
+renderHistory();
+
+/* =========================================================
+   NOME DO AUTOR — lembrado localmente
+   ========================================================= */
+author.value = localStorage.getItem('passagem_servico_author') || '';
+author.addEventListener('change', () => localStorage.setItem('passagem_servico_author', author.value));
+
+/* As URLs dos webhooks são privadas e ficam nas Environment Variables do Vercel.
+   Não são verificadas no navegador. */
+
+</script>
+</body>
+</html>
