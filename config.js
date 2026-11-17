@@ -3,8 +3,8 @@
 const TEAMS_CONFIG = {
   USE_PROXY: true,
   CHATS: [
-    { id: 'chat1', name: 'Chat 1' },
-    { id: 'chat2', name: 'Chat 2' },
-    { id: 'chat3', name: 'Chat 3' }
+    { id: 'chat1', name: 'Cot Passagem' },
+    { id: 'chat2', name: 'Ced Passagem' },
+    { id: 'chat3', name: 'Time Plataformas' }
   ]
 };
